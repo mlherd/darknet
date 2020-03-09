@@ -1,8 +1,26 @@
-![Darknet Logo](http://pjreddie.com/media/files/darknet-black-small.png)
-
 # Darknet #
-Darknet is an open source neural network framework written in C and CUDA. It is fast, easy to install, and supports CPU and GPU computation.
+Original Wrok: [Darknet project website](http://pjreddie.com/darknet).
 
-For more information see the [Darknet project website](http://pjreddie.com/darknet).
+Modified darknet.py
+  - Use camera as source
+  - Draw rectanges around the detected objects
+  - Put a label on each object 
 
-For questions or issues please use the [Google Group](https://groups.google.com/forum/#!forum/darknet).
+Modified files:
+  - darknet.py
+  - image.c
+  - image.h
+  - Makefile
+
+Setup instructions:
+ - Download a pre trained model in the main directory
+   - wget https://pjreddie.com/media/files/yolov3.weights
+- Follow Install Darknet Instructions for this repo
+- Anaconda
+   - Create an enviroment Python 3.6
+   - Install OpenCV and Numpy Packages  
+- make clean
+- make
+
+execute:
+   - python darknet.py
