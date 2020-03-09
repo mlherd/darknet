@@ -1,8 +1,9 @@
-GPU=0
+GPU=1
 CUDNN=0
-OPENCV=0
+OPENCV=1
 OPENMP=0
 DEBUG=0
+NUMPY=1
 
 ARCH= -gencode arch=compute_30,code=sm_30 \
       -gencode arch=compute_35,code=sm_35 \
@@ -44,6 +45,11 @@ COMMON+= -DOPENCV
 CFLAGS+= -DOPENCV
 LDFLAGS+= `pkg-config --libs opencv` -lstdc++
 COMMON+= `pkg-config --cflags opencv` 
+endif
+
+ifeq ($(NUMPY), 1) 
+COMMON+= -DNUMPY -I/usr/include/python2.7/ -I/home/melih/anaconda3/envs/yolopy/lib/python3.6/site-packages/numpy/core/include/numpy
+CFLAGS+= -DNUMPY
 endif
 
 ifeq ($(GPU), 1) 

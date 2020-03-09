@@ -1,6 +1,8 @@
 from ctypes import *
 import math
 import random
+import cv2
+import numpy as np
 
 def sample(probs):
     s = sum(probs)
@@ -42,10 +44,8 @@ class METADATA(Structure):
     _fields_ = [("classes", c_int),
                 ("names", POINTER(c_char_p))]
 
-    
-
 #lib = CDLL("/home/pjreddie/documents/darknet/libdarknet.so", RTLD_GLOBAL)
-lib = CDLL("libdarknet.so", RTLD_GLOBAL)
+lib = CDLL(b"/home/melih/Desktop/yolo/darknet/libdarknet.so", RTLD_GLOBAL)
 lib.network_width.argtypes = [c_void_p]
 lib.network_width.restype = c_int
 lib.network_height.argtypes = [c_void_p]
@@ -114,16 +114,18 @@ predict_image = lib.network_predict_image
 predict_image.argtypes = [c_void_p, IMAGE]
 predict_image.restype = POINTER(c_float)
 
-def classify(net, meta, im):
-    out = predict_image(net, im)
-    res = []
-    for i in range(meta.classes):
-        res.append((meta.names[i], out[i]))
-    res = sorted(res, key=lambda x: -x[1])
-    return res
+ndarray_image = lib.ndarray_to_image
+ndarray_image.argtypes = [POINTER(c_ubyte), POINTER(c_long), POINTER(c_long)]
+ndarray_image.restype = IMAGE
+
+def nparray_to_image(img):
+    data = img.ctypes.data_as(POINTER(c_ubyte))
+    image = ndarray_image(data, img.ctypes.shape, img.ctypes.strides)
+    return image
 
 def detect(net, meta, image, thresh=.5, hier_thresh=.5, nms=.45):
-    im = load_image(image, 0, 0)
+    #im = load_image(image, 0, 0)
+    im = nparray_to_image(image)
     num = c_int(0)
     pnum = pointer(num)
     predict_image(net, im)
@@ -141,16 +143,45 @@ def detect(net, meta, image, thresh=.5, hier_thresh=.5, nms=.45):
     free_image(im)
     free_detections(dets, num)
     return res
-    
-if __name__ == "__main__":
-    #net = load_net("cfg/densenet201.cfg", "/home/pjreddie/trained/densenet201.weights", 0)
-    #im = load_image("data/wolf.jpg", 0, 0)
-    #meta = load_meta("cfg/imagenet1k.data")
-    #r = classify(net, meta, im)
-    #print r[:10]
-    net = load_net("cfg/tiny-yolo.cfg", "tiny-yolo.weights", 0)
-    meta = load_meta("cfg/coco.data")
-    r = detect(net, meta, "data/dog.jpg")
-    print r
-    
 
+def draw_recs(image, objects, names):
+        for i in range (objects.shape[0]):
+            #print (objects[i])
+            #cv2.circle(frame, (int(npr[0,2][0]),int(npr[0,2][1])), 2, (0,0,255), thickness=1, lineType=8, shift=0)
+            rx = (int(objects[i][0]) - int(objects[i][2]/2), int(objects[i][1]) - int(objects[i][3]/2))
+            ry = (int(objects[i][0]) + int(objects[i][2]/2), int(objects[i][1]) + int(objects[i][3]/2))
+            tx = int(objects[i][0])
+            ty = int(objects[i][1])
+            cv2.putText(frame, names[i].decode(), (tx, ty), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,255), 1, 1)
+            cv2.rectangle(frame, rx, ry, (0,0,255), 2)
+
+if __name__ == "__main__":
+    net = load_net(b"/home/melih/Desktop/yolo/darknet/cfg/yolov3.cfg", b"/home/melih/Desktop/yolo/darknet/yolov3.weights", 0)
+    meta = load_meta(b"/home/melih/Desktop/yolo/darknet/cfg/coco.data")
+    
+    cap = cv2.VideoCapture(0)
+    cap.set(3, 1280)
+    cap.set(4, 960)
+    
+    if not (cap.isOpened()):
+        print("Could not open video device")
+
+    while (True):
+        ret, frame = cap.read()
+        r = detect(net, meta, frame)
+        if len(r) != 0: 
+            npr = np.asarray(r)
+            #print(npr[:,2])
+        #print(npr[0,0].decode())
+            draw_recs(frame, npr[:,2], npr[:,0])
+        cv2.imshow("frame", frame)
+        
+        key = cv2.waitKey(1)
+        if key & 0xFF == ord('q'):
+            break
+    
+    cap.release()
+    cv2.destroyAllWindows()
+    #r = detect(net, meta, "/home/melih/Desktop/yolo/darknet/data/dog.jpg")
+    #print r
+    
