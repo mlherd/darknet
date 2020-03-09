@@ -21,7 +21,8 @@ Modified files:
 Setup instructions:
  - Download a pre trained model in the main directory
    - wget https://pjreddie.com/media/files/yolov3.weights
-- Follow Install Darknet Instructions for this repo
+- Follow Install Darknet Instructions 
+   - http://pjreddie.com/darknet
 - Anaconda
    - Create an enviroment Python 3.6
    - Install OpenCV and Numpy Packages  
