@@ -1,6 +1,12 @@
 # Darknet #
 Original Wrok: [Darknet project website](http://pjreddie.com/darknet).
 
+Test System:
+   - Graphics Card: Nvidia GTX 1050Ti 4GB
+   - CPU : Intel i5-3470
+   - RAM: 12GB
+   - ~25 FPS
+
 Modified darknet.py
   - Use camera as source
   - Draw rectanges around the detected objects
@@ -24,3 +30,7 @@ Setup instructions:
 
 execute:
    - python darknet.py
+   
+   or 
+   
+   - ./darknet detector demo cfg/coco.data cfg/yolov3.cfg yolov3.weights
