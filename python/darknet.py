@@ -44,7 +44,6 @@ class METADATA(Structure):
     _fields_ = [("classes", c_int),
                 ("names", POINTER(c_char_p))]
 
-#lib = CDLL("/home/pjreddie/documents/darknet/libdarknet.so", RTLD_GLOBAL)
 lib = CDLL(b"/home/melih/Desktop/yolo/darknet/libdarknet.so", RTLD_GLOBAL)
 lib.network_width.argtypes = [c_void_p]
 lib.network_width.restype = c_int
@@ -124,7 +123,6 @@ def nparray_to_image(img):
     return image
 
 def detect(net, meta, image, thresh=.5, hier_thresh=.5, nms=.45):
-    #im = load_image(image, 0, 0)
     im = nparray_to_image(image)
     num = c_int(0)
     pnum = pointer(num)
@@ -146,8 +144,6 @@ def detect(net, meta, image, thresh=.5, hier_thresh=.5, nms=.45):
 
 def draw_recs(image, objects, names):
         for i in range (objects.shape[0]):
-            #print (objects[i])
-            #cv2.circle(frame, (int(npr[0,2][0]),int(npr[0,2][1])), 2, (0,0,255), thickness=1, lineType=8, shift=0)
             rx = (int(objects[i][0]) - int(objects[i][2]/2), int(objects[i][1]) - int(objects[i][3]/2))
             ry = (int(objects[i][0]) + int(objects[i][2]/2), int(objects[i][1]) + int(objects[i][3]/2))
             tx = int(objects[i][0])
@@ -171,8 +167,6 @@ if __name__ == "__main__":
         r = detect(net, meta, frame)
         if len(r) != 0: 
             npr = np.asarray(r)
-            #print(npr[:,2])
-        #print(npr[0,0].decode())
             draw_recs(frame, npr[:,2], npr[:,0])
         cv2.imshow("frame", frame)
         
@@ -182,6 +176,4 @@ if __name__ == "__main__":
     
     cap.release()
     cv2.destroyAllWindows()
-    #r = detect(net, meta, "/home/melih/Desktop/yolo/darknet/data/dog.jpg")
-    #print r
     
